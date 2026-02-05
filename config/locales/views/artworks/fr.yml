@@ -10,5 +10,5 @@ fr:
       author_placeholder: Nom de l'artiste
       acquisition_price: Prix d'acquisition
       acquisition_source: Source de l'acquisition
-      acquisition_source_placeholder: ex: Galerie, Enchères, Héritage...
+      acquisition_source_placeholder: "ex: Galerie, Enchères, Héritage..."
       image: Photo de l'œuvre

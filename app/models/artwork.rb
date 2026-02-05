@@ -1,8 +1,12 @@
 class Artwork < ApplicationRecord
   include Accountable, Monetizable
 
-  monetize :acquisition_price_cents, allow_nil: true
+  monetize :acquisition_price
   has_one_attached :image
+
+  def monetizable_currency
+    acquisition_price_currency
+  end
 
   class << self
     def color
