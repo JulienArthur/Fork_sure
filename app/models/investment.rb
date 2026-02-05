@@ -55,6 +55,7 @@ class Investment < ApplicationRecord
     "lep" => { short: "LEP", long: "Livret d'Épargne Populaire", region: "fr", tax_treatment: :tax_exempt },
     "livret_bancaire" => { short: "Livret Bancaire", long: "Livret Bancaire", region: "fr", tax_treatment: :taxable },
     "compte_a_terme" => { short: "CAT", long: "Compte à Terme", region: "fr", tax_treatment: :taxable },
+    "pee" => { short: "PEE", long: "Plan d'Épargne Entreprise", region: "fr", tax_treatment: :tax_advantaged },
 
     # === Generic (available everywhere) ===
     "pension" => { short: "Pension", long: "Pension", region: nil, tax_treatment: :tax_deferred },
@@ -103,13 +104,18 @@ class Investment < ApplicationRecord
 
     # Returns subtypes grouped by region for use with grouped_options_for_select
     # Optionally accepts currency to prioritize user's region first
-    def subtypes_grouped_for_select(currency: nil)
+    # Optionally accepts filter_by_region to only show user's region and generic
+    def subtypes_grouped_for_select(currency: nil, filter_by_region: false)
       user_region = CURRENCY_REGION_MAP[currency]
       grouped = SUBTYPES.group_by { |_, v| v[:region] }
 
       # Build region order: user's region first (if known), then Generic, then others
       other_regions = %w[us uk ca au fr eu] - [ user_region ].compact
-      region_order = [ user_region, nil, *other_regions ].compact.uniq
+      region_order = [ user_region, nil, *other_regions ].uniq
+
+      if filter_by_region && user_region
+        region_order = [ user_region, nil ].uniq
+      end
 
       region_order.filter_map do |region|
         next unless grouped[region]

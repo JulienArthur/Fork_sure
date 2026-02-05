@@ -41,6 +41,9 @@ fr:
       compte_a_terme:
         short: CAT
         long: Compte à Terme
+      pee:
+        short: PEE
+        long: Plan d'Épargne Entreprise
       other:
         short: Autre
         long: Autre investissement

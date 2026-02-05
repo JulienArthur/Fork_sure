@@ -44,6 +44,8 @@ en:
         theme_system: System
         theme_title: Theme
         timezone: Timezone
+        filter_investment_subtypes_by_region: Filter investment types by region
+        filter_investment_subtypes_by_region_description: Only show investment types relevant to your region (based on currency)
     profiles:
       destroy:
         cannot_remove_self: You cannot remove yourself from the account.

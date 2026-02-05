@@ -10,35 +10,16 @@
           { label: t(".language"), include_blank: t(".language_auto") },
           { data: { auto_submit_form_target: "auto" } } %>
 
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <p class="text-sm font-medium text-primary"><%= t(".filter_investment_subtypes_by_region") %></p>
+          <p class="text-xs text-secondary"><%= t(".filter_investment_subtypes_by_region_description") %></p>
+        </div>
+        <%= form.toggle :filter_investment_subtypes_by_region,
+            data: { auto_submit_form_target: "auto" } %>
+      </div>
+
       <%= form.fields_for :family do |family_form| %>
-        <%= family_form.select :currency,
-            Money::Currency.as_options.map { |currency| [ "#{currency.name} (#{currency.iso_code})", currency.iso_code ] },
-            { label: t(".currency") }, disabled: true %>
-
-        <%= family_form.select :timezone,
-            timezone_options,
-            { label: t(".timezone") },
-            { data: { auto_submit_form_target: "auto" } } %>
-
-        <%= family_form.select :date_format,
-            Family::DATE_FORMATS,
-            { label: t(".date_format") },
-            { data: { auto_submit_form_target: "auto" } } %>
-
-        <%= form.select :default_period,
-            Period.all.map { |period| [ period.label, period.key ] },
-            { label: t(".default_period") },
-            { data: { auto_submit_form_target: "auto" } } %>
-
-        <%= form.select :default_account_order,
-            AccountOrder.all.map { |order| [ order.label, order.key ] },
-            { label: t(".default_account_order") },
-            { data: { auto_submit_form_target: "auto" } } %>
-
-        <%= family_form.select :country,
-            country_options,
-            { label: t(".country") },
-            { data: { auto_submit_form_target: "auto" } } %>
 
         <p class="text-xs italic pl-2 text-secondary">Please note, we are still working on translations for various languages.</p>
       <% end %>

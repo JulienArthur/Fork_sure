@@ -43,6 +43,8 @@ fr:
         theme_system: Système
         theme_title: Thème
         timezone: Fuseau horaire
+        filter_investment_subtypes_by_region: Filtrer les types d'investissement par région
+        filter_investment_subtypes_by_region_description: N'afficher que les types d'investissement pertinents pour votre région (basé sur la devise)
     profiles:
       destroy:
         cannot_remove_self: Vous ne pouvez pas vous enlever de votre compte.
