@@ -263,12 +263,12 @@ class Demo::Generator
       @amex_gold = family.accounts.create!(accountable: CreditCard.new, name: "Amex Gold Card", balance: 0, currency: "USD")
       @chase_sapphire = family.accounts.create!(accountable: CreditCard.new, name: "Chase Sapphire Reserve", balance: 0, currency: "USD")
 
-      # Investment accounts (EUR)
-      @pea_account          = family.accounts.create!(accountable: Investment.new(subtype: "pea"), name: "Boursorama PEA", balance: 0, currency: "EUR")
-      @assurance_vie_account = family.accounts.create!(accountable: Investment.new(subtype: "assurance_vie"), name: "Linxea Assurance Vie", balance: 0, currency: "EUR")
-      @per_account          = family.accounts.create!(accountable: Investment.new(subtype: "per"), name: "Yomoni PER", balance: 0, currency: "EUR")
-      @livret_a_account     = family.accounts.create!(accountable: Investment.new(subtype: "livret_a"), name: "Livret A (LCL)", balance: 0, currency: "EUR")
-      @cto_account          = family.accounts.create!(accountable: Investment.new(subtype: "cto"), name: "Degiro CTO", balance: 0, currency: "EUR")
+      # Investment accounts (USD + GBP)
+      @vanguard_401k     = family.accounts.create!(accountable: Investment.new, name: "Vanguard 401(k)", balance: 0, currency: "USD")
+      @schwab_brokerage  = family.accounts.create!(accountable: Investment.new, name: "Charles Schwab Brokerage", balance: 0, currency: "USD")
+      @fidelity_roth_ira = family.accounts.create!(accountable: Investment.new, name: "Fidelity Roth IRA", balance: 0, currency: "USD")
+      @hsa_investment    = family.accounts.create!(accountable: Investment.new, name: "Fidelity HSA Investment", balance: 0, currency: "USD")
+      @uk_isa           = family.accounts.create!(accountable: Investment.new, name: "Vanguard UK ISA", balance: 0, currency: "GBP")
 
       # Property (USD)
       @home = family.accounts.create!(accountable: Property.new, name: "Primary Residence", balance: 0, currency: "USD")
@@ -632,55 +632,59 @@ class Demo::Generator
     end
 
     def generate_investment_transactions!
-      security = Security.first || Security.create!(ticker: "CW8", name: "Amundi MSCI World UCITS ETF", country_code: "FR")
+      security = Security.first || Security.create!(ticker: "VTI", name: "Vanguard Total Stock Market ETF", country_code: "US")
 
-      generate_per_trades!(security)
-      generate_pea_trades!(security)
-      generate_assurance_vie_trades!(security)
-      generate_cto_trades!(security)
+      generate_401k_trades!(security)
+      generate_brokerage_trades!(security)
+      generate_roth_trades!(security)
+      generate_uk_isa_trades!(security)
     end
 
-    # ---------------------------------------------------- PER (180 trades) --
-    def generate_per_trades!(security)
-      payroll_dates = collect_payroll_dates.first(90)
+    # ---------------------------------------------------- 401k (180 trades) --
+    def generate_401k_trades!(security)
+      payroll_dates = collect_payroll_dates.first(90) # 90 paydays ⇒ 180 trades
 
       payroll_dates.each do |date|
-        # Employee contribution
-        create_trade_for(@per_account, security, 500, date, "Versement PER")
+        # Employee contribution $1 200
+        create_trade_for(@vanguard_401k, security, 1_200, date, "401k Employee")
+
+        # Employer match $300
+        create_trade_for(@vanguard_401k, security, 300, date, "401k Employer Match")
       end
     end
 
-    # -------------------------------------------- PEA (144 trades) -----
-    def generate_pea_trades!(security)
+    # -------------------------------------------- Brokerage (144 trades) -----
+    def generate_brokerage_trades!(security)
       date_cursor = 36.months.ago.beginning_of_month
       while date_cursor <= Date.current
         4.times do |i|
-          trade_date = date_cursor + i * 7.days
-          create_trade_for(@pea_account, security, rand(200..500), trade_date, "Achat PEA")
+          trade_date = date_cursor + i * 7.days # roughly spread within month
+          create_trade_for(@schwab_brokerage, security, rand(400..1_000), trade_date, "Brokerage Purchase")
         end
         date_cursor = date_cursor.next_month.beginning_of_month
       end
     end
 
-    # ----------------------------------------------- Assurance Vie (108 trades) ---
-    def generate_assurance_vie_trades!(security)
+    # ----------------------------------------------- Roth IRA (108 trades) ---
+    def generate_roth_trades!(security)
       date_cursor = 36.months.ago.beginning_of_month
       while date_cursor <= Date.current
+        # Split $500 monthly across 3 staggered trades
         3.times do |i|
           trade_date = date_cursor + i * 10.days
-          create_trade_for(@assurance_vie_account, security, (300 / 3.0), trade_date, "Versement Assurance Vie")
+          create_trade_for(@fidelity_roth_ira, security, (500 / 3.0), trade_date, "Roth IRA Contribution")
         end
         date_cursor = date_cursor.next_month.beginning_of_month
       end
     end
 
-    # ------------------------------------------------- CTO (108 trades) ----
-    def generate_cto_trades!(security)
+    # ------------------------------------------------- UK ISA (108 trades) ----
+    def generate_uk_isa_trades!(security)
       date_cursor = 36.months.ago.beginning_of_month
       while date_cursor <= Date.current
         3.times do |i|
           trade_date = date_cursor + i * 10.days
-          create_trade_for(@cto_account, security, (200 / 3.0), trade_date, "Achat CTO", price_range: 60..150)
+          create_trade_for(@uk_isa, security, (400 / 3.0), trade_date, "ISA Investment", price_range: 60..150)
         end
         date_cursor = date_cursor.next_month.beginning_of_month
       end
@@ -749,8 +753,8 @@ class Demo::Generator
       # Quarterly HSA contributions
       (3.years.ago.to_date..Date.current).each do |date|
         next unless date.day == 1 && [ 1, 4, 7, 10 ].include?(date.month) # Quarterly
-        amount = rand(200..500)
-        create_transfer!(@chase_checking, @livret_a_account, amount, "Épargne Livret A", date)
+        amount = rand(1000..2000)
+        create_transfer!(@chase_checking, @hsa_investment, amount, "HSA Contribution", date)
       end
 
       # Occasional windfalls (tax refunds, bonuses, etc.)

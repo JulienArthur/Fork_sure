@@ -123,6 +123,7 @@ en:
       ca: Canada
       au: Australia
       eu: Europe
+      fr: France
       generic: General
     confirm_unlink:
       title: Unlink account from provider?

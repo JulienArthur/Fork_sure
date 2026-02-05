@@ -43,6 +43,12 @@ en:
         categories: "Categories"
         value: "Value"
         weight: "Weight"
+      investment_allocation:
+        title: "Investment Allocation"
+        total_portfolio: "Total Portfolio"
+        envelopes: "Envelopes"
+        value: "Value"
+        weight: "Weight"
       investment_summary:
         title: "Investments"
         total_return: "Total Return"

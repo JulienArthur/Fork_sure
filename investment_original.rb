@@ -41,20 +41,9 @@ class Investment < ApplicationRecord
     "smsf" => { short: "SMSF", long: "Self-Managed Super Fund", region: "au", tax_treatment: :tax_deferred },
 
     # === Europe ===
+    "pea" => { short: "PEA", long: "Plan d'Épargne en Actions", region: "eu", tax_treatment: :tax_advantaged },
     "pillar_3a" => { short: "Pillar 3a", long: "Private Pension (Pillar 3a)", region: "eu", tax_treatment: :tax_deferred },
     "riester" => { short: "Riester", long: "Riester-Rente", region: "eu", tax_treatment: :tax_deferred },
-
-    # === France ===
-    "assurance_vie" => { short: "Assurance Vie", long: "Assurance Vie", region: "fr", tax_treatment: :tax_advantaged },
-    "pea" => { short: "PEA", long: "Plan d'Épargne en Actions", region: "fr", tax_treatment: :tax_advantaged },
-    "pea_pme" => { short: "PEA-PME", long: "PEA-PME", region: "fr", tax_treatment: :tax_advantaged },
-    "per" => { short: "PER", long: "Plan d'Épargne Retraite", region: "fr", tax_treatment: :tax_deferred },
-    "cto" => { short: "CTO", long: "Compte-Titres Ordinaire", region: "fr", tax_treatment: :taxable },
-    "livret_a" => { short: "Livret A", long: "Livret A", region: "fr", tax_treatment: :tax_exempt },
-    "ldd" => { short: "LDD", long: "Livret de Développement Durable", region: "fr", tax_treatment: :tax_exempt },
-    "lep" => { short: "LEP", long: "Livret d'Épargne Populaire", region: "fr", tax_treatment: :tax_exempt },
-    "livret_bancaire" => { short: "Livret Bancaire", long: "Livret Bancaire", region: "fr", tax_treatment: :taxable },
-    "compte_a_terme" => { short: "CAT", long: "Compte à Terme", region: "fr", tax_treatment: :taxable },
 
     # === Generic (available everywhere) ===
     "pension" => { short: "Pension", long: "Pension", region: nil, tax_treatment: :tax_deferred },
@@ -82,11 +71,6 @@ class Investment < ApplicationRecord
       "chart-line"
     end
 
-    # Returns subtypes for use with options_for_select
-    def subtypes_for_select
-      SUBTYPES.map { |k, v| [ v[:long], k ] }
-    end
-
     def region_label_for(region)
       I18n.t("accounts.subtype_regions.#{region || 'generic'}")
     end
@@ -97,7 +81,7 @@ class Investment < ApplicationRecord
       "GBP" => "uk",
       "CAD" => "ca",
       "AUD" => "au",
-      "EUR" => "fr",
+      "EUR" => "eu",
       "CHF" => "eu"
     }.freeze
 
@@ -108,7 +92,7 @@ class Investment < ApplicationRecord
       grouped = SUBTYPES.group_by { |_, v| v[:region] }
 
       # Build region order: user's region first (if known), then Generic, then others
-      other_regions = %w[us uk ca au fr eu] - [ user_region ].compact
+      other_regions = %w[us uk ca au eu] - [ user_region ].compact
       region_order = [ user_region, nil, *other_regions ].compact.uniq
 
       region_order.filter_map do |region|

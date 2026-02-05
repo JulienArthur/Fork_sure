@@ -7,29 +7,29 @@ module Simplefin
   class AccountTypeMapper
     Inference = Struct.new(:accountable_type, :subtype, :confidence, keyword_init: true)
 
-    RETIREMENT_KEYWORDS = /\b(per|assurance.vie|pea|pea.pme|retirement)\b/i.freeze
-    BROKERAGE_KEYWORD = /\b(cto|brokerage)\b/i.freeze
-    CREDIT_NAME_KEYWORDS = /\b(credit|card|carte)\b/i.freeze
+    RETIREMENT_KEYWORDS = /\b(401k|401\(k\)|403b|403\(b\)|tsp|ira|roth|retirement)\b/i.freeze
+    BROKERAGE_KEYWORD = /\bbrokerage\b/i.freeze
+    CREDIT_NAME_KEYWORDS = /\b(credit|card)\b/i.freeze
     CREDIT_BRAND_KEYWORDS = /\b(visa|mastercard|amex|american express|discover|apple card|freedom unlimited|quicksilver)\b/i.freeze
-    LOAN_KEYWORDS = /\b(loan|mortgage|heloc|line of credit|loc|pret|emprunt)\b/i.freeze
-    CHECKING_KEYWORDS = /\b(checking|chequing|dda|demand deposit|courant|depot)\b/i.freeze
-    SAVINGS_KEYWORDS = /\b(savings|sav|money market|mma|high.yield|livret|epargne)\b/i.freeze
+    LOAN_KEYWORDS = /\b(loan|mortgage|heloc|line of credit|loc)\b/i.freeze
+    CHECKING_KEYWORDS = /\b(checking|chequing|dda|demand deposit)\b/i.freeze
+    SAVINGS_KEYWORDS = /\b(savings|sav|money market|mma|high.yield)\b/i.freeze
     CRYPTO_KEYWORDS = /\b(bitcoin|btc|ethereum|eth|crypto|cryptocurrency|litecoin|dogecoin|solana)\b/i.freeze
     # "Cash" as a standalone name (not "cash back", "cash rewards", etc.)
     CASH_ACCOUNT_PATTERN = /\A\s*cash\s*\z/i.freeze
 
     # Explicit investment subtype tokens mapped to known SUBTYPES keys
     EXPLICIT_INVESTMENT_TOKENS = {
-      /\bassurance\s*vie\b/i => "assurance_vie",
-      /\bpea\s*pme\b/i => "pea_pme",
-      /\bpea\b/i => "pea",
-      /\bper\b/i => "per",
-      /\bcto\b|\bcompte\s*titres\b/i => "cto",
-      /\blivret\s*a\b/i => "livret_a",
-      /\bldd\b|\blivret\s*de\s*developpement\s*durable\b/i => "ldd",
-      /\blep\b|\blivret\s*d\s*epargne\s*populaire\b/i => "lep",
-      /\blivret\s*bancaire\b/i => "livret_bancaire",
-      /\bcompte\s*a\s*terme\b|\bcat\b/i => "compte_a_terme"
+      /\btraditional\s+ira\b/i => "ira",
+      /\broth\s+ira\b/i => "roth_ira",
+      /\broth\s+401\(k\)\b|\broth\s*401k\b/i => "roth_401k",
+      /\b401\(k\)\b|\b401k\b/i => "401k",
+      /\b529\s*plan\b|\b529\b/i => "529_plan",
+      /\bhsa\b|\bhealth\s+savings\s+account\b/i => "hsa",
+      /\bpension\b/i => "pension",
+      /\bmutual\s+fund\b/i => "mutual_fund",
+      /\b403b\b|\b403\(b\)\b/i => "403b",
+      /\btsp\b/i => "tsp"
     }.freeze
 
     # Public API

@@ -51,7 +51,6 @@ fr:
         amount: Montant
         balance: Solde
         confirmed: Confirmé
-        date: Date
         entries: entrées
         entry: entrée
         filter: Filtrer

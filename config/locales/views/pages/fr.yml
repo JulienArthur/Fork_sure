@@ -23,3 +23,11 @@ fr:
         no_account_yet: Pas encore de compte
         add_account_to_display: Ajouter des comptes pour afficher les données de valeur nette
         new: Ajouter un compte
+      investment_allocation:
+        title: Répartition des investissements
+        total_portfolio: Valeur totale
+        envelopes: Enveloppes
+        value: Valeur
+        weight: Poids
+      investment_summary:
+        title: Résumé des investissements

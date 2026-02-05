@@ -106,6 +106,24 @@ class InvestmentStatement
     end
   end
 
+  # Portfolio allocation by account subtype (e.g., PEA, PER, etc.)
+  def allocation_by_subtype
+    accounts = investment_accounts.to_a
+    total = accounts.sum(&:balance)
+
+    return [] if total.zero?
+
+    accounts.group_by(&:subtype).map do |subtype, accounts_group|
+      amount = accounts_group.sum(&:balance)
+      AllocationBySubtype.new(
+        subtype: subtype,
+        amount: Money.new(amount, family.currency),
+        weight: (amount.to_f / total * 100).round(1),
+        accounts: accounts_group
+      )
+    end.sort_by { |a| -a.amount.amount }
+  end
+
   # Unrealized gains across all holdings
   def unrealized_gains
     current_holdings.sum do |holding|
@@ -180,6 +198,7 @@ class InvestmentStatement
     end
 
     HoldingAllocation = Data.define(:security, :amount, :weight, :trend)
+    AllocationBySubtype = Data.define(:subtype, :amount, :weight, :accounts)
 
     def totals_query(trades_scope:)
       sql_hash = Digest::MD5.hexdigest(trades_scope.to_sql)

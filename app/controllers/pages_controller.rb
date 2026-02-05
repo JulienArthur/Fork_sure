@@ -16,6 +16,7 @@ class PagesController < ApplicationController
 
     @cashflow_sankey_data = build_cashflow_sankey_data(income_totals, expense_totals, family_currency)
     @outflows_data = build_outflows_donut_data(expense_totals)
+    @investment_allocation_data = build_investment_allocation_donut_data(@investment_statement)
 
     @dashboard_sections = build_dashboard_sections
 
@@ -95,6 +96,14 @@ class PagesController < ApplicationController
           title: "pages.dashboard.investment_summary.title",
           partial: "pages/dashboard/investment_summary",
           locals: { investment_statement: @investment_statement, period: @period },
+          visible: Current.family.accounts.any? && @investment_statement.investment_accounts.any?,
+          collapsible: true
+        },
+        {
+          key: "investment_allocation",
+          title: "pages.dashboard.investment_allocation.title",
+          partial: "pages/dashboard/investment_allocation",
+          locals: { investment_statement: @investment_statement, allocation_data: @investment_allocation_data },
           visible: Current.family.accounts.any? && @investment_statement.investment_accounts.any?,
           collapsible: true
         },
@@ -208,6 +217,26 @@ class PagesController < ApplicationController
         end
 
       { categories: categories, total: total.to_f.round(2), currency: expense_totals.currency, currency_symbol: currency_symbol }
+    end
+
+    def build_investment_allocation_donut_data(investment_statement)
+      currency_symbol = Money::Currency.new(Current.family.currency).symbol
+      total = investment_statement.portfolio_value_money
+
+      allocations = investment_statement.allocation_by_subtype.map.with_index do |allocation, idx|
+      {
+        id: allocation.subtype,
+        name: allocation.accounts.first.short_subtype_label,
+        amount: allocation.amount.to_f.round(2),
+        currency: Current.family.currency,
+        percentage: allocation.weight,
+        color: Category::COLORS[idx % Category::COLORS.size],
+        icon: Investment.icon,
+        clickable: false
+      }
+    end
+
+      { segments: allocations, total: total.to_f.round(2), currency: Current.family.currency, currency_symbol: currency_symbol }
     end
 
     # Processes category totals for sankey diagram, handling parent/subcategory relationships.
