@@ -10,6 +10,40 @@ fr:
       title: Saisir le solde du compte
     show:
       chart_title: Valeur totale
+    subtypes:
+      assurance_vie:
+        short: Assurance Vie
+        long: Assurance Vie
+      pea:
+        short: PEA
+        long: Plan d'Épargne en Actions
+      pea_pme:
+        short: PEA-PME
+        long: PEA-PME
+      per:
+        short: PER
+        long: Plan d'Épargne Retraite
+      cto:
+        short: CTO
+        long: Compte-Titres Ordinaire
+      livret_a:
+        short: Livret A
+        long: Livret A
+      ldd:
+        short: LDD
+        long: Livret de Développement Durable
+      lep:
+        short: LEP
+        long: Livret d'Épargne Populaire
+      livret_bancaire:
+        short: Livret Bancaire
+        long: Livret Bancaire
+      compte_a_terme:
+        short: CAT
+        long: Compte à Terme
+      other:
+        short: Autre
+        long: Autre investissement
     value_tooltip:
       cash: Liquidités
       holdings: Titres
