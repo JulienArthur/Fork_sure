@@ -1,0 +1,7 @@
+---
+en:
+  artworks:
+    edit:
+      edit: Edit %{account}
+    new:
+      title: Enter artwork details
