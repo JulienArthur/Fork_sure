@@ -22,3 +22,12 @@
 - **Migration** : Création et exécution de la migration pour les préférences utilisateur.
 - **Identité** : Correction du nom de l'auteur des commits (**JulienArthur**).
 - **Synchronisation** : Mise à jour du fork avec le dépôt officiel (`upstream`). Résolution de conflits dans le contrôleur utilisateur et les localisations pour maintenir nos fonctions personnalisées.
+
+### 🎨 Nouveau Type d'Actif : Œuvre d'Art
+- **Modèle** : Création du modèle `Artwork` avec icône palette et couleur violette.
+- **Migration** : Table `artworks` créée avec UUID.
+- **Traductions** : Ajout des libellés FR/EN pour les œuvres d'art.
+- **Routes** : Ajout des routes RESTful pour les artworks.
+- **Contrôleur** : Création du `ArtworksController` avec le concern `AccountableResource`.
+- **Vues** : Création des formulaires de création et édition d'œuvres d'art.
+- **Personnalisation** : Ajout de champs spécifiques (`author`, `acquisition_price`, `acquisition_source`) et support pour une photo d'illustration via Active Storage.

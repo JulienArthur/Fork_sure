@@ -1,3 +1,25 @@
 <%# locals: (account:, url:) %>
 
-<%= render "accounts/form", account: account, url: url %>
+<%= render "accounts/form", account: account, url: url do |form| %>
+  <div class="space-y-4">
+    <%= form.fields_for :accountable do |artwork_form| %>
+      <%= artwork_form.text_field :author,
+                                    label: t("artworks.form.author"),
+                                    placeholder: t("artworks.form.author_placeholder") %>
+
+      <div class="flex items-center gap-2">
+        <%= artwork_form.money_field :acquisition_price,
+                                       label: t("artworks.form.acquisition_price"),
+                                       default_currency: Current.family.currency %>
+      </div>
+
+      <%= artwork_form.text_field :acquisition_source,
+                                    label: t("artworks.form.acquisition_source"),
+                                    placeholder: t("artworks.form.acquisition_source_placeholder") %>
+
+      <%= artwork_form.file_field :image,
+                                    label: t("artworks.form.image"),
+                                    accept: "image/*" %>
+    <% end %>
+  </div>
+<% end %>

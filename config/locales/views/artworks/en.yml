@@ -5,3 +5,10 @@ en:
       edit: Edit %{account}
     new:
       title: Enter artwork details
+    form:
+      author: Author
+      author_placeholder: Artist name
+      acquisition_price: Acquisition price
+      acquisition_source: Acquisition source
+      acquisition_source_placeholder: e.g. Gallery, Auction, Inheritance...
+      image: Artwork photo
