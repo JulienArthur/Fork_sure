@@ -1,5 +1,5 @@
 class Artwork < ApplicationRecord
-  include Accountable
+  include Accountable, Monetizable
 
   monetize :acquisition_price_cents, allow_nil: true
   has_one_attached :image
