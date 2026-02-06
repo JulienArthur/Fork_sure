@@ -40,13 +40,21 @@
 - **Convention Comptable** : Documentation de la convention de signes (Revenus < 0, Dépenses > 0) dans les règles globales pour éviter les inversions de données.
 
 ### 🏦 Correction Données Qonto
-- **Data Fix** : Correction de l'inversion des signes sur les transactions Qonto. Inversion des revenus (en négatif) et maintien des dépenses (en positif) selon la logique interne de l'application.
-- **Vérification** : Confirmation via console que les revenus (`GALERIE OMAGH`, etc.) sont bien stockés en négatif.
+- **Data Fix (Signes)** : Correction de l'inversion des signes sur les transactions Qonto (Revenus en négatif, Dépenses en positif).
+- **Data Fix (Balances)** : Résolution du bug de solde à 0 lors de la synchro.
+    - **Processor** : Utilisation de `set_current_balance` pour forcer la création du point d'ancrage (`current_anchor`).
+    - **Importer** : Amélioration de la sélection du solde via l'API Enable Banking (gestion des multi-balances par matching de nom "Compte principal" / "Réserve TVA").
+    - **Rattrapage** : Injection manuelle des soldes corrects (6 876,74 € et 10 000,00 €) pour rétablir l'historique.
 
 ### 🎨 Finalisation Artwork
 - **Validation** : Vérification bout-en-bout du modèle `Artwork` (attributs `author`, `acquisition_price`, etc.).
 - **Stabilité** : Confirmation du bon fonctionnement des migrations et des classes monétisables.
 
-### 🛠 État du Dépôt
-- **Git** : Fusion de la branche de feature dans `main`. Retour à un "tronc simple" pour la suite du développement.
-- **Branche actuelle** : `main`.
+### 🛠 État du Dépôt et Bilan
+- **Branche** : `main` (à jour avec upstream).
+- **Modifications en attente (Staging)** :
+    - `app/models/enable_banking_account/processor.rb` : Fix critique pour création d'ancres.
+    - `app/models/enable_banking_item/importer.rb` : Fix critique pour sélection de balance.
+    - `Dockerfile` : Ajout de paquets de debug (`vim`, `curl`).
+- **Modifications à annuler (Revert)** :
+    - `app/models/balance/materializer.rb` et `reverse_calculator.rb` : Logs de debug temporaires à nettoyer.

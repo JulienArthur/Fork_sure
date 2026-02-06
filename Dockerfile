@@ -9,7 +9,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq \
-    && apt-get install --no-install-recommends -y curl libvips postgresql-client libyaml-0-2 procps \
+    && apt-get install --no-install-recommends -y curl libvips postgresql-client libyaml-0-2 procps vim \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Set production environment
@@ -19,7 +19,7 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
     BUILD_COMMIT_SHA=${BUILD_COMMIT_SHA}
-    
+
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
@@ -34,8 +34,19 @@ RUN bundle install \
     && rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git \
     && bundle exec bootsnap precompile --gemfile -j 0
 
-# Copy application code
-COPY . .
+# Copy application code explicitly
+COPY app /rails/app
+COPY config /rails/config
+COPY lib /rails/lib
+COPY public /rails/public
+COPY bin /rails/bin
+COPY db /rails/db
+COPY spec /rails/spec
+COPY tmp /rails/tmp
+COPY vendor /rails/vendor
+COPY Rakefile /rails/Rakefile
+COPY README.md /rails/README.md
+COPY config.ru /rails/config.ru
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile -j 0 app/ lib/

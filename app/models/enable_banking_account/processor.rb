@@ -36,7 +36,12 @@ class EnableBankingAccount::Processor
       end
 
       account = enable_banking_account.current_account
-      balance = enable_banking_account.current_balance || 0
+      if enable_banking_account.current_balance.nil?
+        Rails.logger.warn("EnableBankingAccount::Processor - Missing current_balance for enable_banking_account #{enable_banking_account.id}, skipping balance update")
+        return
+      end
+
+      balance = enable_banking_account.current_balance
 
       # For credit cards, compute balance based on credit limit
       if account.accountable_type == "CreditCard"
@@ -49,11 +54,8 @@ class EnableBankingAccount::Processor
 
       currency = parse_currency(enable_banking_account.currency) || account.currency || "EUR"
 
-      account.update!(
-        balance: balance,
-        cash_balance: balance,
-        currency: currency
-      )
+      account.set_current_balance(balance)
+      account.update!(cash_balance: balance, currency: currency)
     end
 
     def process_transactions

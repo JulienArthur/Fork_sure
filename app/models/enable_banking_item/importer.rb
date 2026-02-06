@@ -85,12 +85,14 @@ class EnableBankingItem::Importer
           transactions_imported += result[:transactions_count]
         else
           transactions_failed += 1
+          Rails.logger.error "EnableBankingItem::Importer - Failed to fetch or store transactions for account #{enable_banking_account.uid}: #{result[:error]}" if result[:error]
         end
       rescue => e
         transactions_failed += 1
         Rails.logger.error "EnableBankingItem::Importer - Failed to process account #{enable_banking_account.uid}: #{e.message}"
       end
     end
+
 
     {
       success: accounts_failed == 0 && transactions_failed == 0,
@@ -128,29 +130,77 @@ class EnableBankingItem::Importer
     end
 
     def fetch_and_update_balance(enable_banking_account)
+      # Reload to ensure we have the latest raw_payload from import_account
+      enable_banking_account.reload
+
+      puts "DEBUG: Fetching balances for API Account ID: #{enable_banking_account.api_account_id} (UID: #{enable_banking_account.uid})"
       balance_data = enable_banking_provider.get_account_balances(account_id: enable_banking_account.api_account_id)
 
       # Enable Banking returns an array of balances
       balances = balance_data[:balances] || []
-      return if balances.empty?
+      
+      puts "DEBUG: Fetched #{balances.count} balances"
+      
+      if balances.empty?
+        Rails.logger.warn "EnableBankingItem::Importer - No balances found for account #{enable_banking_account.uid}"
+        return
+      end
 
-      # Find the most relevant balance (prefer "ITAV" or "CLAV" types)
-      balance = balances.find { |b| b[:balance_type] == "ITAV" } ||
-                balances.find { |b| b[:balance_type] == "CLAV" } ||
-                balances.find { |b| b[:balance_type] == "ITBD" } ||
-                balances.find { |b| b[:balance_type] == "CLBD" } ||
-                balances.first
+      # Find the most relevant balance
+      # For some providers (like Qonto), the balances endpoint returns a list of all wallet balances.
+      # We try to find the one that matches this specific account, otherwise fallback to heuristics.
+      
+      payload = (enable_banking_account.raw_payload || {}).with_indifferent_access
+      account_name = payload["name"]
+      account_details = payload["details"]
+      
+      puts "DEBUG: ACCOUNT UID: #{enable_banking_account.uid}"
+      puts "DEBUG: EXPECTED NAME: #{account_name.inspect} DETAILS: #{account_details.inspect}"
+
+      # Heuristic: Sort by last_change_date_time and non-zero amount
+      sorted_balances = balances.sort_by do |b|
+        amount = (b.dig(:balance_amount, :amount) || b[:amount]).to_d
+        [
+          amount > 0 ? 1 : 0, # Prefer non-zero balances
+          b[:last_change_date_time] || "" # Prefer most recent change
+        ]
+      end.reverse
+      
+      sorted_balances.each do |b|
+        puts "DEBUG: CANDIDATE: name=#{b[:name].inspect} amount=#{b.dig(:balance_amount, :amount) || b[:amount]} type=#{b[:balance_type]} date=#{b[:last_change_date_time]}"
+      end
+
+      # 1. Try to find a balance where name matches exactly
+      balance = sorted_balances.find { |b| b[:name].present? && (b[:name] == account_name || b[:name] == account_details) }
+      
+      # 2. Try fuzzy name match if still not found
+      if balance.blank? && (account_name.present? || account_details.present?)
+        balance = sorted_balances.find do |b| 
+          next if b[:name].blank?
+          (account_name.present? && b[:name].include?(account_name)) || 
+          (account_details.present? && b[:name].include?(account_details))
+        end
+      end
+      
+      # 3. Fallback to the previous type-based selection among the sorted balances
+      if balance.blank?
+        balance = sorted_balances.find { |b| b[:balance_type] == "ITAV" } ||
+                  sorted_balances.find { |b| b[:balance_type] == "CLAV" } ||
+                  sorted_balances.find { |b| b[:balance_type] == "ITBD" } ||
+                  sorted_balances.find { |b| b[:balance_type] == "CLBD" } ||
+                  sorted_balances.first
+      end
 
       if balance.present?
-        amount = balance.dig(:balance_amount, :amount) || balance[:amount]
+        amount = (balance.dig(:balance_amount, :amount) || balance[:amount]).to_d
         currency = balance.dig(:balance_amount, :currency) || balance[:currency]
 
-        if amount.present?
-          enable_banking_account.update!(
-            current_balance: amount.to_d,
-            currency: currency.presence || enable_banking_account.currency
-          )
-        end
+        Rails.logger.info "EnableBankingItem::Importer - Picked balance for account #{enable_banking_account.uid}: name=#{balance[:name].inspect}, type=#{balance[:balance_type]}, amount=#{amount}"
+
+        enable_banking_account.update!(
+          current_balance: amount,
+          currency: currency.presence || enable_banking_account.currency
+        )
       end
     rescue Provider::EnableBanking::EnableBankingError => e
       Rails.logger.error "EnableBankingItem::Importer - Error fetching balance for account #{enable_banking_account.uid}: #{e.message}"
