@@ -8,7 +8,10 @@ export default class extends Controller {
     data: Object,
     nodeWidth: { type: Number, default: 15 },
     nodePadding: { type: Number, default: 20 },
-    currencySymbol: { type: String, default: "$" }
+    currencySymbol: { type: String, default: "$" },
+    enableClick: { type: Boolean, default: false },
+    startDate: String,
+    endDate: String
   };
 
   // Visual constants
@@ -314,11 +317,20 @@ export default class extends Controller {
       .on("mouseleave", () => {
         resetHover();
         this.#hideTooltip();
+      })
+      .on("click", (event, d) => {
+        if (this.enableClickValue && (d.source.clickable !== false || d.target.clickable !== false)) {
+          this.#handleClick(d);
+        }
+      })
+      .style("cursor", d => {
+        const isClickable = this.enableClickValue && (d.source.is_category || d.target.is_category) && (d.source.clickable !== false || d.target.clickable !== false);
+        return isClickable ? "pointer" : "default";
       });
 
     // Hover on node rectangles (not just text)
     nodeGroups.selectAll("path")
-      .style("cursor", "default")
+      .style("cursor", d => this.enableClickValue && d.is_category && d.clickable !== false ? "pointer" : "default")
       .on("mouseenter", (event, d) => {
         const connectedLinks = sankeyData.links.filter(l => l.source === d || l.target === d);
         applyHover(connectedLinks);
@@ -328,9 +340,15 @@ export default class extends Controller {
       .on("mouseleave", () => {
         resetHover();
         this.#hideTooltip();
+      })
+      .on("click", (event, d) => {
+        if (this.enableClickValue && d.is_category && d.clickable !== false) {
+          this.#handleClick(d);
+        }
       });
 
     nodeGroups.selectAll("text")
+      .style("cursor", d => this.enableClickValue && d.is_category && d.clickable !== false ? "pointer" : "default")
       .on("mouseenter", (event, d) => {
         const connectedLinks = sankeyData.links.filter(l => l.source === d || l.target === d);
         applyHover(connectedLinks);
@@ -340,7 +358,37 @@ export default class extends Controller {
       .on("mouseleave", () => {
         resetHover();
         this.#hideTooltip();
+      })
+      .on("click", (event, d) => {
+        if (this.enableClickValue && d.is_category && d.clickable !== false) {
+          this.#handleClick(d);
+        }
       });
+  }
+
+  // Handles click and navigation
+  #handleClick(d) {
+    let categoryName = null;
+
+    if (d.is_category) {
+      categoryName = d.category_name;
+    } else if (d.source?.is_category || d.target?.is_category) {
+      // For links, pick the more specific category (usually the target for outbound, source for inbound)
+      // but if both are categories, they represent a parent-sub relationship in this Sankey
+      categoryName = d.target.is_category ? d.target.category_name : d.source.category_name;
+    }
+
+    if (!categoryName || !this.startDateValue || !this.endDateValue) return;
+
+    const encodedCategory = encodeURIComponent(categoryName);
+    const url = `/transactions?q[categories][]=${encodedCategory}&q[start_date]=${this.startDateValue}&q[end_date]=${this.endDateValue}`;
+
+    // Use Turbo for smoother navigation if possible, otherwise window.location
+    if (window.Turbo) {
+      window.Turbo.visit(url);
+    } else {
+      window.location.href = url;
+    }
   }
 
   // Tooltip methods
