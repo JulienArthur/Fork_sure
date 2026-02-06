@@ -1,0 +1,124 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">
+      <%= t(".title") %>
+    </h1>
+    <p class="text-sm lg:text-base text-secondary">
+      <%= t(".subtitle") %>
+    </p>
+  </div>
+<% end %>
+
+<div class="w-full space-y-6 pb-6 lg:pb-12">
+  <!-- Status Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-container border border-secondary shadow-border-xs rounded-xl p-4">
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".net_worth") %></p>
+      <p class="text-2xl font-medium text-primary"><%= @net_worth.format %></p>
+    </div>
+
+    <div class="bg-container border border-secondary shadow-border-xs rounded-xl p-4">
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".annual_expenses") %></p>
+      <p class="text-2xl font-medium text-primary"><%= Money.new(@annual_expenses, Current.family.currency).format %></p>
+    </div>
+
+    <div class="bg-container border border-secondary shadow-border-xs rounded-xl p-4">
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".fire_target") %></p>
+      <p class="text-2xl font-medium text-primary"><%= Money.new(@fire_target, Current.family.currency).format %></p>
+    </div>
+
+    <div class="bg-container border border-secondary shadow-border-xs rounded-xl p-4">
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".progress") %></p>
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-2xl font-medium text-primary"><%= @progress_percentage %>%</p>
+        <p class="text-xs font-medium text-secondary">Retraite en <%= @retirement_year %></p>
+      </div>
+      <div class="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div class="h-full bg-blue-600" style="width: <%= @progress_percentage %>%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Chart & Settings -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Chart -->
+    <div class="lg:col-span-2 bg-container border border-secondary shadow-border-xs rounded-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-secondary flex items-center justify-between">
+        <h2 class="text-base font-medium text-primary flex items-center gap-2">
+          <%= icon("trending-up", size: "sm", class: "text-secondary") %>
+          <%= t(".projection_title") %>
+        </h2>
+      </div>
+      
+      <div class="p-4">
+        <div 
+          class="w-full h-80"
+          data-controller="time-series-chart"
+          data-time-series-chart-data-value="<%= @projection_data.to_json %>">
+        </div>
+
+        <p class="text-xs text-secondary mt-4 italic">
+          <%= t(".projection_note") %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="bg-container border border-secondary shadow-border-xs rounded-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-secondary">
+        <h2 class="text-base font-medium text-primary flex items-center gap-2">
+          <%= icon("settings", size: "sm", class: "text-secondary") %>
+          <%= t(".settings_title") %>
+        </h2>
+      </div>
+      
+      <div class="p-4">
+        <%= form_with url: fire_path, method: :patch, class: "space-y-6" do |f| %>
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <%= f.label :swr, t(".swr_label"), class: "text-xs font-medium text-secondary uppercase" %>
+              <div class="flex items-center gap-4">
+                <%= f.range_field :swr, in: 1..10, step: 0.1, value: @swr, 
+                    class: "flex-1 accent-primary", 
+                    oninput: "this.nextElementSibling.value = this.value + '%'" %>
+                <output class="text-primary font-medium w-12 text-right"><%= @swr %>%</output>
+              </div>
+              <p class="text-xs text-secondary"><%= t(".swr_note") %></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-field">
+                <%= f.label :birth_year, t(".birth_year_label"), class: "form-field__label" %>
+                <%= f.number_field :birth_year, value: @birth_year, class: "form-field__input", placeholder: "1991" %>
+              </div>
+
+              <div class="form-field">
+                <%= f.label :retirement_age, t(".retirement_age_label"), class: "form-field__label" %>
+                <%= f.number_field :retirement_age, value: @retirement_age, class: "form-field__input", placeholder: "65" %>
+              </div>
+            </div>
+          </div>
+
+          <%= render DS::Button.new(type: "submit", class: "w-full") do %>
+            <%= t(".update_button") %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Information Section -->
+  <div class="bg-container border border-secondary shadow-border-xs rounded-xl p-6">
+    <div class="flex items-start gap-4">
+      <div class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-secondary">
+        <%= icon("info", size: "sm") %>
+      </div>
+      <div class="space-y-1">
+        <h3 class="text-base font-medium text-primary"><%= t(".how_it_works_title") %></h3>
+        <p class="text-sm text-secondary leading-relaxed">
+          <%= t(".how_it_works_description") %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

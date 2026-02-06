@@ -12,6 +12,15 @@ fr:
         no_cashflow: Aucune donnée de flux de trésorerie pour cette période
         add_transactions_to_display_cashflow: Ajoutez des transactions pour afficher les données de flux de trésorerie ou étendre la période
         new: Ajouter une transaction
+      cashflow_summary:
+        title: Résumé des flux
+        income: Revenus
+        expenses: Dépenses
+        surplus: Surplus
+        income_chart_title: Répartition des revenus
+        expense_chart_title: Répartition des dépenses
+        total_income: Total revenus
+        total_expense: Total dépenses
       net_worth_chart:
         data_not_available: Données indisponibles pour la période sélectionnée
         title: Valeur nette

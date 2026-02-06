@@ -11,11 +11,12 @@ class PagesController < ApplicationController
     family_currency = Current.family.currency
 
     # Use IncomeStatement for all cashflow data (now includes categorized trades)
-    income_totals = Current.family.income_statement.income_totals(period: @period)
-    expense_totals = Current.family.income_statement.expense_totals(period: @period)
+    @income_totals = Current.family.income_statement.income_totals(period: @period)
+    @expense_totals = Current.family.income_statement.expense_totals(period: @period)
 
-    @cashflow_sankey_data = build_cashflow_sankey_data(income_totals, expense_totals, family_currency)
-    @outflows_data = build_outflows_donut_data(expense_totals)
+    @cashflow_sankey_data = build_cashflow_sankey_data(@income_totals, @expense_totals, family_currency)
+    @incomes_data = build_incomes_donut_data(@income_totals)
+    @outflows_data = build_outflows_donut_data(@expense_totals)
     @investment_allocation_data = build_investment_allocation_donut_data(@investment_statement)
 
     @dashboard_sections = build_dashboard_sections
@@ -76,19 +77,19 @@ class PagesController < ApplicationController
     def build_dashboard_sections
       all_sections = [
         {
+          key: "cashflow_summary",
+          title: "pages.dashboard.cashflow_summary.title",
+          partial: "pages/dashboard/cashflow_summary",
+          locals: { income_totals: @income_totals, expense_totals: @expense_totals, incomes_data: @incomes_data, outflows_data: @outflows_data, period: @period },
+          visible: Current.family.accounts.any?,
+          collapsible: true
+        },
+        {
           key: "cashflow_sankey",
           title: "pages.dashboard.cashflow_sankey.title",
           partial: "pages/dashboard/cashflow_sankey",
           locals: { sankey_data: @cashflow_sankey_data, period: @period },
           visible: Current.family.accounts.any?,
-          collapsible: true
-        },
-        {
-          key: "outflows_donut",
-          title: "pages.dashboard.outflows_donut.title",
-          partial: "pages/dashboard/outflows_donut",
-          locals: { outflows_data: @outflows_data, period: @period },
-          visible: Current.family.accounts.any? && @outflows_data[:categories].present?,
           collapsible: true
         },
         {
@@ -127,13 +128,17 @@ class PagesController < ApplicationController
 
       # Order sections according to user preference
       section_order = Current.user.dashboard_section_order
-      ordered_sections = section_order.map do |key|
-        all_sections.find { |s| s[:key] == key }
-      end.compact
+      ordered_sections = []
+      
+      # First, add the sections in the user's preferred order
+      section_order.each do |key|
+        section = all_sections.find { |s| s[:key] == key }
+        ordered_sections << section if section
+      end
 
-      # Add any new sections that aren't in the saved order (future-proofing)
+      # Then, add any remaining sections that weren't in the user's order
       all_sections.each do |section|
-        ordered_sections << section unless ordered_sections.include?(section)
+        ordered_sections << section unless ordered_sections.any? { |s| s[:key] == section[:key] }
       end
 
       ordered_sections
@@ -226,6 +231,29 @@ class PagesController < ApplicationController
         end
 
       { categories: categories, total: total.to_f.round(2), currency: expense_totals.currency, currency_symbol: currency_symbol }
+    end
+
+    def build_incomes_donut_data(income_totals)
+      currency_symbol = Money::Currency.new(income_totals.currency).symbol
+      total = income_totals.total
+
+      categories = income_totals.category_totals
+        .reject { |ct| ct.category.parent_id.present? || ct.total.zero? }
+        .sort_by { |ct| -ct.total }
+        .map do |ct|
+          {
+            id: ct.category.id,
+            name: ct.category.name,
+            amount: ct.total.to_f.round(2),
+            currency: ct.currency,
+            percentage: ct.weight.round(1),
+            color: ct.category.color.presence || Category::UNCATEGORIZED_COLOR,
+            icon: ct.category.lucide_icon,
+            clickable: true
+          }
+        end
+
+      { categories: categories, total: total.to_f.round(2), currency: income_totals.currency, currency_symbol: currency_symbol }
     end
 
     def build_investment_allocation_donut_data(investment_statement)

@@ -1,0 +1,20 @@
+fr:
+  fire:
+    show:
+      title: "Estimateur FIRE"
+      subtitle: "Votre chemin vers l'indépendance financière."
+      updated: "Paramètres FIRE mis à jour avec succès."
+      net_worth: "Patrimoine Actuel"
+      annual_expenses: "Dépenses Annuelles (Est.)"
+      fire_target: "Objectif FIRE"
+      progress: "Progrès"
+      projection_title: "Projection sur 10 ans"
+      projection_note: "* Simulation basée sur une croissance annuelle de 5% du capital."
+      settings_title: "Paramètres"
+      swr_label: "Taux de Retrait Sécurisé (SWR)"
+      swr_note: "Classiquement 4% (Règle des 25)."
+      birth_year_label: "Année de naissance"
+      retirement_age_label: "Âge de retraite cible"
+      update_button: "Mettre à jour les calculs"
+      how_it_works_title: "Comment est calculé votre objectif ?"
+      how_it_works_description: "Nous analysons vos dépenses réelles sur les 12 derniers mois pour estimer votre coût de la vie annuel. L'objectif FIRE correspond à la somme nécessaire pour que, en retirant un pourcentage annuel (votre SWR), vous puissiez couvrir ces dépenses indéfiniment sans épuiser votre capital."

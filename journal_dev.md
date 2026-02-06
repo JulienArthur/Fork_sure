@@ -50,11 +50,23 @@
 - **Validation** : Vérification bout-en-bout du modèle `Artwork` (attributs `author`, `acquisition_price`, etc.).
 - **Stabilité** : Confirmation du bon fonctionnement des migrations et des classes monétisables.
 
+### 🧮 Estimateur FIRE & Dashboard Pro Max
+- **FIRE Estimator** : Implémentation d'un calculateur FIRE avec paramètres personnalisables (`fire_birth_year`, `fire_retirement_age`). Redesign complet "Native UI" (fin du Glassmorphism).
+- **Dashboard Restructuring** : 
+    - Regroupement des métriques de Cashflow dans un bloc `cashflow_summary`.
+    - Ajout de graphiques Donut interactifs (Revenus vs Dépenses) alignés côte à côte.
+    - Création de `_donut_chart_card.html.erb` réutilisable.
+    - Suppression des listes de catégories sous les donuts pour un look minimaliste.
+- **Bug Fixes & Polish** :
+    - **PagesController** : Correction d'erreurs de syntaxe (`end` manquant) et restauration de méthodes orphelines.
+    - **Dashboard Sections** : Fix de la logique de tri (`any?`) pour assurer la présence de tous les panels (Sankey, Net Worth, etc.).
+    - **Local Variables** : Fix d'erreurs 500 dans les partials.
+
 ### 🛠 État du Dépôt et Bilan
 - **Branche** : `main` (à jour avec upstream).
-- **Modifications en attente (Staging)** :
-    - `app/models/enable_banking_account/processor.rb` : Fix critique pour création d'ancres.
-    - `app/models/enable_banking_item/importer.rb` : Fix critique pour sélection de balance.
-    - `Dockerfile` : Ajout de paquets de debug (`vim`, `curl`).
-- **Modifications à annuler (Revert)** :
-    - `app/models/balance/materializer.rb` et `reverse_calculator.rb` : Logs de debug temporaires à nettoyer.
+- **Modifications appliquées** :
+    - `PagesController.rb` : Logique dashboard et fix syntaxe.
+    - `FireController.rb` : Logique FIRE native.
+    - `Setting.rb` : Préférences utilisateur FIRE.
+    - Vues et Localisations : Harmonisation design system et traductions FR.
+- **Infrastructure** : Reconstruction Docker `sure-web` validée.

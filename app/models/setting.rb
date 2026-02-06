@@ -12,6 +12,10 @@ class Setting < RailsSettings::Base
   field :openai_json_mode, type: :string, default: ENV["LLM_JSON_MODE"]
   field :brand_fetch_client_id, type: :string, default: ENV["BRAND_FETCH_CLIENT_ID"]
   field :brand_fetch_high_res_logos, type: :boolean, default: ENV.fetch("BRAND_FETCH_HIGH_RES_LOGOS", "false") == "true"
+  field :fire_swr, type: :float, default: 4.0
+  field :fire_birth_year, type: :integer, default: 1991
+  field :fire_retirement_age, type: :integer, default: 65
+
 
   BRAND_FETCH_LOGO_SIZE_STANDARD = 40
   BRAND_FETCH_LOGO_SIZE_HIGH_RES = 120

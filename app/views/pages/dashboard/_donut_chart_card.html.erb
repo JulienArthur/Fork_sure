@@ -1,0 +1,47 @@
+<%# locals: (data:, period:, title:, type:) %>
+<div class="bg-container border border-secondary shadow-border-xs rounded-xl p-6">
+  <h3 class="text-sm font-medium text-primary mb-6 uppercase tracking-wider text-center"><%= title %></h3>
+  
+  <div class="flex justify-center items-center">
+    <!-- Donut Chart -->
+    <div class="w-full max-w-[240px]">
+      <div class="h-[240px] relative"
+        data-controller="donut-chart"
+        data-donut-chart-segments-value="<%= data[:categories].to_json %>"
+        data-donut-chart-segment-opacity-value="0.9"
+        data-donut-chart-extended-hover-value="true"
+        data-donut-chart-hover-extension-value="3"
+        data-donut-chart-enable-click-value="true"
+        data-donut-chart-start-date-value="<%= period.date_range.first %>"
+        data-donut-chart-end-date-value="<%= period.date_range.last %>">
+        <div data-donut-chart-target="chartContainer" class="absolute inset-0 pointer-events-none"></div>
+
+        <div data-donut-chart-target="contentContainer" class="flex justify-center items-center h-full">
+          <div data-donut-chart-target="defaultContent" class="flex flex-col items-center">
+            <div class="text-secondary text-xs mb-1">
+              <span><%= t("pages.dashboard.cashflow_summary.total_#{type}") %></span>
+            </div>
+
+            <div class="text-xl font-medium text-primary">
+              <%= format_money Money.new(data[:total], data[:currency]) %>
+            </div>
+          </div>
+
+          <% data[:categories].each do |category| %>
+            <div id="segment_<%= category[:id] %>" class="hidden">
+              <div class="flex flex-col gap-1 items-center">
+                <p class="text-[10px] text-secondary uppercase"><%= category[:name] %></p>
+
+                <p class="text-xl font-medium text-primary">
+                  <%= data[:currency_symbol] %><%= number_with_delimiter(category[:amount], delimiter: ",") %>
+                </p>
+
+                <p class="text-xs text-secondary"><%= category[:percentage] %>%</p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

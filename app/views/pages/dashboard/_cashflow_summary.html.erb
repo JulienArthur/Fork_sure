@@ -1,0 +1,57 @@
+<%# locals: (income_totals:, expense_totals:, incomes_data:, outflows_data:, period:, **args) %>
+
+<div id="cashflow-summary">
+  <div class="flex justify-end items-center px-4 mb-4">
+    <%= form_with url: root_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "_top" } do |form| %>
+      <%= form.select :period,
+                    Period.as_options,
+                    { selected: period.key },
+                    data: { "auto-submit-form-target": "auto" },
+                    class: "bg-container border border-secondary font-medium rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4">
+    <%= link_to transactions_path(q: { types: ["income"], start_date: period.date_range.first, end_date: period.date_range.last }), 
+                class: "block bg-container border border-secondary shadow-border-xs rounded-xl p-4 cursor-pointer hover:bg-container-hover transition-colors group",
+                data: { turbo_frame: "_top" } do %>
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".income") %></p>
+      <p class="text-2xl font-medium text-green-600"><%= Money.new(income_totals.total, income_totals.currency).format %></p>
+    <% end %>
+
+    <%= link_to transactions_path(q: { types: ["expense"], start_date: period.date_range.first, end_date: period.date_range.last }), 
+                class: "block bg-container border border-secondary shadow-border-xs rounded-xl p-4 cursor-pointer hover:bg-container-hover transition-colors group",
+                data: { turbo_frame: "_top" } do %>
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".expenses") %></p>
+      <p class="text-2xl font-medium text-red-600"><%= Money.new(expense_totals.total, expense_totals.currency).format %></p>
+    <% end %>
+
+    <% 
+      income_money = Money.new(income_totals.total, income_totals.currency)
+      expense_money = Money.new(expense_totals.total, expense_totals.currency)
+      surplus_money = income_money - expense_money
+    %>
+    <%= link_to transactions_path(q: { types: ["income", "expense"], start_date: period.date_range.first, end_date: period.date_range.last }), 
+                class: "block bg-container border border-secondary shadow-border-xs rounded-xl p-4 cursor-pointer hover:bg-container-hover transition-colors group",
+                data: { turbo_frame: "_top" } do %>
+      <p class="text-xs font-medium text-secondary uppercase tracking-wider mb-1"><%= t(".surplus") %></p>
+      <p class="text-2xl font-medium <%= surplus_money.negative? ? 'text-red-600' : 'text-primary' %>">
+        <%= surplus_money.format %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 mt-4">
+    <%= render "pages/dashboard/donut_chart_card", 
+               data: incomes_data, 
+               period: period, 
+               title: t(".income_chart_title"), 
+               type: "income" %>
+
+    <%= render "pages/dashboard/donut_chart_card", 
+               data: outflows_data, 
+               period: period, 
+               title: t(".expense_chart_title"), 
+               type: "expense" %>
+  </div>
+</div>
