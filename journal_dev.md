@@ -31,3 +31,22 @@
 - **Contrôleur** : Création du `ArtworksController` avec le concern `AccountableResource`.
 - **Vues** : Création des formulaires de création et édition d'œuvres d'art.
 - **Personnalisation** : Ajout de champs spécifiques (`author`, `acquisition_price`, `acquisition_source`) et support pour une photo d'illustration via Active Storage.
+
+## 06/02/2026
+
+### 🐳 Protocole Docker & Standardisation
+- **Docker First** : Mise en place d'une règle stricte imposant l'usage de `docker exec -i sure-web` pour toutes les commandes Rails/Bundle.
+- **Nettoyage** : Suppression des fichiers de règles redondants (`AGENTS.md`, `CLAUDE.md`) pour centraliser la configuration dans `.agent/rules.md`.
+- **Convention Comptable** : Documentation de la convention de signes (Revenus < 0, Dépenses > 0) dans les règles globales pour éviter les inversions de données.
+
+### 🏦 Correction Données Qonto
+- **Data Fix** : Correction de l'inversion des signes sur les transactions Qonto. Inversion des revenus (en négatif) et maintien des dépenses (en positif) selon la logique interne de l'application.
+- **Vérification** : Confirmation via console que les revenus (`GALERIE OMAGH`, etc.) sont bien stockés en négatif.
+
+### 🎨 Finalisation Artwork
+- **Validation** : Vérification bout-en-bout du modèle `Artwork` (attributs `author`, `acquisition_price`, etc.).
+- **Stabilité** : Confirmation du bon fonctionnement des migrations et des classes monétisables.
+
+### 🛠 État du Dépôt
+- **Git** : Fusion de la branche de feature dans `main`. Retour à un "tronc simple" pour la suite du développement.
+- **Branche actuelle** : `main`.
